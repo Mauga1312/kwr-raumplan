@@ -388,12 +388,12 @@ const ALL_OFFICES = [...OG2.filter(r=>r.office), ...OG3.filter(r=>r.office)];
 const SUPABASE_URL = 'https://zxcgmcyqsxkjhctbifdy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4Y2dtY3lxc3hramhjdGJpdGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1MzI2ODQsImV4cCI6MjA4ODEwODY4NH0.CRRUDILfO1OZiIT3pDuhvpJTkyRs_KjyKeec5jdEb4U';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 async function loadState() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('absences')
       .select('*');
     
@@ -421,7 +421,7 @@ async function loadState() {
 
 async function saveToSupabase(item) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('absences')
       .insert([{
         name: item.name,
@@ -445,7 +445,7 @@ async function saveToSupabase(item) {
 
 async function deleteFromSupabase(id) {
   try {
-    const { error } = await supabase
+    const { error } = await db
       .from('absences')
       .delete()
       .eq('id', id);
