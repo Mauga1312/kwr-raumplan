@@ -319,20 +319,20 @@ text.rname  { font-family:'Sora',sans-serif; font-size:7.5px; pointer-events:non
 const ROOM_ASSIGNMENTS = {
   // OG 2
   'og2-1':  { occupant: 'Alexandra Winterauer-Wörgetter', shared: '' },
-  'og2-2':  { occupant: 'Sekretariat KTH und HR', shared: 'Petra Hubek, Victoria Cesar & Gabriel Maurel' },
+  'og2-2':  { occupant: 'Sekretariat KTH und HR', shared: 'Petra Hubek, Victoria Cesar & Sabine Lechleitner' },
   'og2-3':  { occupant: 'Maximilian Donath', shared: '' },
   'og2-4':  { occupant: 'Elisabeth Plese', shared: '' },
   'og2-5':  { occupant: 'Lucas Degelsegger und Petra Artner', shared: '' },
   'og2-6':  { occupant: 'Alina Testor, Selina Orhan, Jasmin Haberauer und Michelle Kronberger', shared: '' },
-  'og2-7':  { occupant: 'Dr. Trettnak-Hahnl', shared: '' },
+  'og2-7':  { occupant: 'Christian Temmel', shared: '' },
   'og2-8':  { occupant: 'Mats Schröder', shared: '' },
   'og2-9':  { occupant: 'Melina Still', shared: '' },
   'og2-10': { occupant: 'Kilian Juritsch', shared: '' },
   'og2-11': { occupant: 'Barbara Kuchar', shared: '' },
   'og2-12': { occupant: 'Paula Zeilinger', shared: 'Marvin Georg' },
-  'og2-13': { occupant: 'Anna Mertinz', shared: '' },
-  'og2-14': { occupant: 'Stefan Burischek', shared: '' },
-  'og2-15': { occupant: 'Daria Granofszky, Jessica Tratter und Sasan Djalali', shared: '' },
+  'og2-13': { occupant: 'Anna Mertinz', shared: 'Florentina Schuberth (Vertretung)' },
+  'og2-14': { occupant: 'Christian Knauder', shared: '' },
+  'og2-15': { occupant: 'Daria Granofszky, Jessica Tratter und Sasan Djalali', shared: 'Matthias Stuppacher' },
   'og2-16': { occupant: 'Geraldine Gagyi', shared: '' },
   'og2-17': { occupant: 'Dominik Simic', shared: '' },
   'og2-18': { occupant: 'Stefanie Präauer', shared: 'Julia Kandler' },
@@ -357,8 +357,8 @@ const ROOM_ASSIGNMENTS = {
   'og3-21': { occupant: 'Anika Kollar', shared: '' },
   'og3-22': { occupant: 'Drucker 33', shared: '' },
   'og3-23': { occupant: 'Christina Wieser', shared: '' },
-  'og3-24': { occupant: 'Manuel Marterbauer', shared: '' },
-  'og3-25': { occupant: 'Michael Urbanek', shared: '' },
+  'og3-24': { occupant: 'Maximilian Temmel', shared: '' },
+  'og3-25': { occupant: 'Manuel Marterbauer', shared: '' },
   'og3-26': { occupant: 'Dr. Wietrzyk', shared: '' },
   'og3-27': { occupant: 'Dr. Zehetner', shared: '' },
   'og3-28': { occupant: 'Sekretariat GW & Buchhaltung', shared: 'Daniela Altieri & Karin Schönauer' },
@@ -928,16 +928,19 @@ function openRoomDetail(r) {
   if (status === 'free' && absence) {
     foot.innerHTML = `
       <button class="btn btn-ghost" onclick="closeRoomModal()">Schließen</button>
+      <button class="btn btn-ghost" onclick="openEditAssignment('${r.id}')">✏️ Bearbeiten</button>
       <button class="btn btn-red" onclick="removeAbsence('${r.id}','${viewDateStr}')">Abwesenheit löschen</button>
       <button class="btn btn-blue" onclick="openTempModal(${absence.id})">Temporär nutzen</button>`;
   } else if (status === 'temp' && absence) {
     foot.innerHTML = `
       <button class="btn btn-ghost" onclick="closeRoomModal()">Schließen</button>
+      <button class="btn btn-ghost" onclick="openEditAssignment('${r.id}')">✏️ Bearbeiten</button>
       <button class="btn btn-red" onclick="removeAbsence('${r.id}','${viewDateStr}')">Abwesenheit löschen</button>
       <button class="btn btn-ghost" onclick="removeTempUsage(${absence.id})">Temp. Nutzung aufheben</button>`;
   } else {
     foot.innerHTML = `
       <button class="btn btn-ghost" onclick="closeRoomModal()">Schließen</button>
+      <button class="btn btn-ghost" onclick="openEditAssignment('${r.id}')">✏️ Bearbeiten</button>
       <button class="btn btn-green" onclick="closeRoomModal();openAbsentModal('${r.id}')">Abwesenheit eintragen</button>`;
   }
 
@@ -945,6 +948,38 @@ function openRoomDetail(r) {
 }
 
 function closeRoomModal(){ document.getElementById('roomOverlay').classList.remove('open'); }
+
+function openEditAssignment(roomId) {
+  const assign = ROOM_ASSIGNMENTS[roomId] || { occupant: '', shared: '' };
+  const ta = 'width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.88rem;resize:vertical;box-sizing:border-box';
+  document.getElementById('roomDetailContent').innerHTML = `
+    <div class="room-detail-ttl">Belegung bearbeiten</div>
+    <div class="detail-section">
+      <div class="detail-section-title">Inhaber / Personen</div>
+      <textarea id="edit-occupant" rows="2" style="${ta}">${assign.occupant}</textarea>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Geteilt mit / Vertretung (optional)</div>
+      <textarea id="edit-shared" rows="2" style="${ta}">${assign.shared || ''}</textarea>
+    </div>
+    <div style="font-size:0.78rem;color:var(--ink2);margin-top:4px">Wird lokal in deinem Browser gespeichert.</div>`;
+  document.getElementById('roomDetailFooter').innerHTML = `
+    <button class="btn btn-ghost" onclick="openRoomDetail(currentRoom)">Abbrechen</button>
+    <button class="btn btn-green" onclick="saveRoomAssignment('${roomId}')">Speichern</button>`;
+}
+
+function saveRoomAssignment(roomId) {
+  const occupant = document.getElementById('edit-occupant').value.trim();
+  const shared   = document.getElementById('edit-shared').value.trim();
+  ROOM_ASSIGNMENTS[roomId] = { occupant, shared };
+  try {
+    const custom = JSON.parse(localStorage.getItem('kwr-assignments') || '{}');
+    custom[roomId] = { occupant, shared };
+    localStorage.setItem('kwr-assignments', JSON.stringify(custom));
+  } catch(e) {}
+  renderAll();
+  closeRoomModal();
+}
 
 async function removeAbsence(roomId, viewDateStr) {
   const toDelete = state.filter(a=>a.roomId===roomId && viewDateStr >= a.dateFrom && viewDateStr <= a.dateTo);
@@ -1059,6 +1094,11 @@ function goToday() {
 updateDateDisplay();
 
 (async function init() {
+  // Lokale Anpassungen aus localStorage übernehmen
+  try {
+    const custom = localStorage.getItem('kwr-assignments');
+    if (custom) Object.assign(ROOM_ASSIGNMENTS, JSON.parse(custom));
+  } catch(e) {}
   state = await loadState();
   renderAll();
 })();
