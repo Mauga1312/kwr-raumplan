@@ -292,7 +292,20 @@ text.rname  { font-family:'Sora',sans-serif; font-size:7.5px; pointer-events:non
         <input id="tempName" type="text" placeholder="Dein Name" list="staffList" autocomplete="off">
       </div>
       <div class="fg">
-        <label>Zeitraum</label>
+        <label>Datum</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <input id="tempDateFrom" type="date" style="margin:0">
+            <div style="font-size:0.68rem;color:var(--ink2);margin-top:3px">Von</div>
+          </div>
+          <div>
+            <input id="tempDateTo" type="date" style="margin:0">
+            <div style="font-size:0.68rem;color:var(--ink2);margin-top:3px">Bis</div>
+          </div>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Uhrzeit</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div>
             <input id="tempFrom" type="time" value="09:00" style="margin:0">
@@ -508,8 +521,10 @@ async function loadState() {
       note: row.note || '',
       occupiedBy: row.occupied_by || null,
       tempUser: row.temp_user || null,
+      tempDateFrom: row.temp_date_from || null,
+      tempDateTo:   row.temp_date_to   || null,
       tempFrom: row.temp_from || null,
-      tempTo: row.temp_to || null,
+      tempTo:   row.temp_to   || null,
     }));
     return items;
   } catch (err) {
@@ -569,11 +584,11 @@ async function deleteFromSupabase(id) {
   }
 }
 
-async function setTempUsage(absenceId, tempUser, tempFrom, tempTo) {
+async function setTempUsage(absenceId, tempUser, tempDateFrom, tempDateTo, tempFrom, tempTo) {
   try {
     const { error } = await db
       .from('absences')
-      .update({ temp_user: tempUser, temp_from: tempFrom, temp_to: tempTo })
+      .update({ temp_user: tempUser, temp_date_from: tempDateFrom, temp_date_to: tempDateTo, temp_from: tempFrom, temp_to: tempTo })
       .eq('id', absenceId);
     if (error) throw error;
     return true;
@@ -588,7 +603,7 @@ async function clearTempUsage(absenceId) {
   try {
     const { error } = await db
       .from('absences')
-      .update({ temp_user: null, temp_from: null, temp_to: null })
+      .update({ temp_user: null, temp_date_from: null, temp_date_to: null, temp_from: null, temp_to: null })
       .eq('id', absenceId);
     if (error) throw error;
     return true;
@@ -927,7 +942,7 @@ function openRoomDetail(r) {
   if (status === 'temp' && absence) {
     html += `<div class="detail-section" style="background:var(--temp-fill);border-color:var(--temp-stroke)">
       <div class="detail-section-title" style="color:var(--temp-text)">Temporäre Nutzung</div>
-      <div class="detail-section-value"><strong>${absence.tempUser}</strong> nutzt dieses Zimmer${absence.tempFrom && absence.tempTo ? ' von ' + absence.tempFrom.substring(0,5) + ' bis ' + absence.tempTo.substring(0,5) : ''}</div>
+      <div class="detail-section-value"><strong>${absence.tempUser}</strong> nutzt dieses Zimmer${absence.tempDateFrom && absence.tempDateTo ? ' · ' + formatShortDate(absence.tempDateFrom) + (absence.tempDateFrom !== absence.tempDateTo ? ' – ' + formatShortDate(absence.tempDateTo) : '') : ''}${absence.tempFrom && absence.tempTo ? ' · ' + absence.tempFrom.substring(0,5) + ' – ' + absence.tempTo.substring(0,5) + ' Uhr' : ''}</div>
     </div>`;
   }
 
@@ -1019,6 +1034,10 @@ function openTempModal(absenceId) {
   document.getElementById('tempName').value = saved;
   document.getElementById('tempFrom').value = '09:00';
   document.getElementById('tempTo').value = '17:00';
+  // Datum aus der Abwesenheit vorausfüllen
+  const absence = state.find(a => a.id === absenceId);
+  document.getElementById('tempDateFrom').value = absence ? absence.dateFrom : '';
+  document.getElementById('tempDateTo').value   = absence ? absence.dateTo   : '';
   document.getElementById('tempOverlay').classList.add('open');
   setTimeout(() => document.getElementById('tempName').focus(), 80);
 }
@@ -1026,16 +1045,21 @@ function openTempModal(absenceId) {
 function closeTempModal(){ document.getElementById('tempOverlay').classList.remove('open'); currentTempAbsenceId = null; }
 
 async function saveTempUsage() {
-  const name = document.getElementById('tempName').value.trim();
-  const from = document.getElementById('tempFrom').value;
-  const to   = document.getElementById('tempTo').value;
+  const name     = document.getElementById('tempName').value.trim();
+  const dateFrom = document.getElementById('tempDateFrom').value;
+  const dateTo   = document.getElementById('tempDateTo').value;
+  const from     = document.getElementById('tempFrom').value;
+  const to       = document.getElementById('tempTo').value;
 
-  if (!name) { shake('tempName'); return; }
+  if (!name)     { shake('tempName');     return; }
+  if (!dateFrom) { shake('tempDateFrom'); return; }
+  if (!dateTo)   { shake('tempDateTo');   return; }
+  if (dateTo < dateFrom) { shake('tempDateTo'); showToast('"Bis"-Datum muss nach "Von"-Datum sein'); return; }
   if (!from) { shake('tempFrom'); return; }
   if (!to)   { shake('tempTo');   return; }
-  if (from >= to) { shake('tempTo'); showToast('"Bis" muss nach "Von" sein'); return; }
+  if (from >= to && dateFrom === dateTo) { shake('tempTo'); showToast('"Bis"-Uhrzeit muss nach "Von" sein'); return; }
 
-  const ok = await setTempUsage(currentTempAbsenceId, name, from + ':00', to + ':00');
+  const ok = await setTempUsage(currentTempAbsenceId, name, dateFrom, dateTo, from + ':00', to + ':00');
   if (ok) {
     localStorage.setItem('kwr_myname', name);
     closeTempModal();
