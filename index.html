@@ -392,18 +392,18 @@ const ROOM_ASSIGNMENTS = {
 
 // ── ROOMS ─────────────────────────────────────────────────────────────────────
 const OG2 = [
-  // Untere lange Reihe (3–8, von links nach rechts)
-  {id:'og2-3',  x:600, y:700, w:88, h:82, label:'3',  office:true},
-  {id:'og2-4',  x:688, y:700, w:88, h:82, label:'4',  office:true},
-  {id:'og2-5',  x:776, y:700, w:88, h:82, label:'5',  office:true},
-  {id:'og2-6',  x:864, y:700, w:88, h:82, label:'6',  office:true},
-  {id:'og2-7',  x:952, y:700, w:88, h:82, label:'7',  office:true},
-  {id:'og2-8',  x:1040,y:700, w:88, h:82, label:'8',  office:true},
-  // Links (durch Durchgang): 14 oben → 11 unten
-  {id:'og2-14', x:380, y:460, w:110, h:80, label:'14', office:true},
-  {id:'og2-13', x:380, y:540, w:110, h:80, label:'13', office:true},
-  {id:'og2-12', x:380, y:620, w:110, h:80, label:'12', office:true},
-  {id:'og2-11', x:380, y:700, w:110, h:80, label:'11', office:true},
+  // Links (durch Durchgang): 14–11 horizontal, gleiche Linie wie 3–8
+  {id:'og2-14', x:160, y:700, w:90, h:82, label:'14', office:true},
+  {id:'og2-13', x:250, y:700, w:90, h:82, label:'13', office:true},
+  {id:'og2-12', x:340, y:700, w:90, h:82, label:'12', office:true},
+  {id:'og2-11', x:430, y:700, w:90, h:82, label:'11', office:true},
+  // Untere lange Reihe (8 links → 3 rechts, Durchgang bei x=520–600)
+  {id:'og2-8',  x:600, y:700, w:88, h:82, label:'8',  office:true},
+  {id:'og2-7',  x:688, y:700, w:88, h:82, label:'7',  office:true},
+  {id:'og2-6',  x:776, y:700, w:88, h:82, label:'6',  office:true},
+  {id:'og2-5',  x:864, y:700, w:88, h:82, label:'5',  office:true},
+  {id:'og2-4',  x:952, y:700, w:88, h:82, label:'4',  office:true},
+  {id:'og2-3',  x:1040,y:700, w:88, h:82, label:'3',  office:true},
   // Rechts oben: 1 (oben), 2 (unten)
   {id:'og2-1',  x:1040,y:360, w:100,h:115, label:'1',  office:true},
   {id:'og2-2',  x:1040,y:475, w:100,h:115, label:'2',  office:true},
