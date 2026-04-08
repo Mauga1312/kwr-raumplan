@@ -336,6 +336,7 @@ const ROOM_ASSIGNMENTS = {
   'og2-16': { occupant: 'Geraldine Gagyi', shared: '' },
   'og2-17': { occupant: 'Dominik Simic', shared: '' },
   'og2-18': { occupant: 'Stefanie Präauer', shared: 'Julia Kandler' },
+  'og2-bz': { occupant: 'Besprechung', shared: '' },
   // OG 3
   'og3-4':  { occupant: 'Andreas Herrmann', shared: '' },
   'og3-6':  { occupant: 'Dr. Karasek', shared: '' },
@@ -391,26 +392,34 @@ const ROOM_ASSIGNMENTS = {
 
 // ── ROOMS ─────────────────────────────────────────────────────────────────────
 const OG2 = [
-  {id:'og2-3',  x:900,y:650,w:90,h:85, label:'3',  office:true},
-  {id:'og2-4',  x:810,y:650,w:90,h:85, label:'4',  office:true},
-  {id:'og2-5',  x:720,y:650,w:90,h:85, label:'5',  office:true},
-  {id:'og2-6',  x:630,y:650,w:90,h:85, label:'6',  office:true},
-  {id:'og2-7',  x:540,y:650,w:90,h:85, label:'7',  office:true},
-  {id:'og2-8',  x:450,y:650,w:90,h:85, label:'8',  office:true},
-  {id:'og2-9',  x:700,y:450,w:90,h:90, label:'9',  office:true},
-  {id:'og2-10', x:590,y:450,w:110,h:90, label:'10', office:true},
-  {id:'og2-11', x:850,y:550,w:70,h:70, label:'11', office:true},
-  {id:'og2-12', x:780,y:550,w:70,h:70, label:'12', office:true},
-  {id:'og2-13', x:710,y:550,w:70,h:70, label:'13', office:true},
-  {id:'og2-14', x:640,y:550,w:70,h:70, label:'14', office:true},
-  {id:'og2-15', x:450,y:340,w:120,h:100, label:'15', office:true},
-  {id:'og2-16', x:450,y:230,w:120,h:100, label:'16', office:true},
-  {id:'og2-17', x:570,y:200,w:100,h:90,  label:'17', office:true},
-  {id:'og2-18', x:670,y:180,w:100,h:110, label:'18', office:true},
-  {id:'og2-1',  x:900,y:370,w:90,h:110, label:'1',  office:true},
-  {id:'og2-2',  x:900,y:480,w:90,h:110, label:'2',  office:true},
-  {id:'og2-treppe1', x:450,y:140,w:60,h:60, label:'Treppe', office:false},
-  {id:'og2-treppe2', x:780,y:300,w:70,h:70, label:'Treppe', office:false},
+  // Untere lange Reihe (3–8, von links nach rechts)
+  {id:'og2-3',  x:600, y:700, w:88, h:82, label:'3',  office:true},
+  {id:'og2-4',  x:688, y:700, w:88, h:82, label:'4',  office:true},
+  {id:'og2-5',  x:776, y:700, w:88, h:82, label:'5',  office:true},
+  {id:'og2-6',  x:864, y:700, w:88, h:82, label:'6',  office:true},
+  {id:'og2-7',  x:952, y:700, w:88, h:82, label:'7',  office:true},
+  {id:'og2-8',  x:1040,y:700, w:88, h:82, label:'8',  office:true},
+  // Links (durch Durchgang): 14 oben → 11 unten
+  {id:'og2-14', x:380, y:460, w:110, h:80, label:'14', office:true},
+  {id:'og2-13', x:380, y:540, w:110, h:80, label:'13', office:true},
+  {id:'og2-12', x:380, y:620, w:110, h:80, label:'12', office:true},
+  {id:'og2-11', x:380, y:700, w:110, h:80, label:'11', office:true},
+  // Rechts oben: 1 (oben), 2 (unten)
+  {id:'og2-1',  x:1040,y:360, w:100,h:115, label:'1',  office:true},
+  {id:'og2-2',  x:1040,y:475, w:100,h:115, label:'2',  office:true},
+  // Linke Spalte: 17 (oben), 16, 15 (groß)
+  {id:'og2-17', x:270, y:165, w:110, h:85,  label:'17', office:true},
+  {id:'og2-16', x:270, y:265, w:110, h:95,  label:'16', office:true},
+  {id:'og2-15', x:270, y:375, w:110, h:125, label:'15', office:true},
+  // Zimmer 18 gegenüber (rechts vom Treppenhaus)
+  {id:'og2-18', x:510, y:200, w:100, h:115, label:'18', office:true},
+  // Mitte: 10, 9 und neues Besprechungszimmer (über 10)
+  {id:'og2-10', x:590, y:430, w:105, h:90, label:'10',          office:true},
+  {id:'og2-9',  x:705, y:430, w:90,  h:90, label:'9',           office:true},
+  {id:'og2-bz', x:590, y:330, w:105, h:90, label:'Besprechung', office:true},
+  // Nicht buchbar
+  {id:'og2-kueche', x:270, y:510, w:110, h:75,  label:'Küche',  office:false},
+  {id:'og2-treppe', x:490, y:50,  w:110, h:150, label:'Treppe', office:false},
 ];
 
 const OG3 = [
@@ -443,8 +452,8 @@ const OG3 = [
   {id:'og3-wc',      x:1130,y:430, w:70,h:80, label:'WC',    office:false},
   {id:'og3-server',  x:990,y:190, w:70,h:70, label:'Server', office:false},
   {id:'og3-kueche',  x:990,y:260, w:70,h:70, label:'Küche',  office:false},
-  {id:'og3-26',      x:800,y:420, w:120,h:85, label:'26',    office:true},
-  {id:'og3-27',      x:800,y:505, w:120,h:85, label:'27',    office:true},
+  {id:'og3-26',      x:845,y:420, w:120,h:85, label:'26',    office:true},
+  {id:'og3-27',      x:845,y:505, w:120,h:85, label:'27',    office:true},
   {id:'og3-treppe',  x:660,y:420, w:90,h:100, label:'Treppe', office:false},
   {id:'og3-28',      x:750,y:520, w:90,h:70,  label:'28',    office:true},
   {id:'og3-29',      x:660,y:520, w:90,h:70,  label:'29',    office:true},
