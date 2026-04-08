@@ -541,6 +541,22 @@ async function saveToSupabase(item) {
   }
 }
 
+async function loadCustomAssignments() {
+  try {
+    const { data, error } = await db.from('room_assignments').select('*');
+    if (error) throw error;
+    data.forEach(row => {
+      ROOM_ASSIGNMENTS[row.room_id] = { occupant: row.occupant, shared: row.shared || '' };
+    });
+  } catch(e) {
+    // Tabelle existiert noch nicht → localStorage als Fallback
+    try {
+      const custom = localStorage.getItem('kwr-assignments');
+      if (custom) Object.assign(ROOM_ASSIGNMENTS, JSON.parse(custom));
+    } catch(e2) {}
+  }
+}
+
 async function deleteFromSupabase(id) {
   try {
     const { error } = await db.from('absences').delete().eq('id', id);
@@ -968,17 +984,20 @@ function openEditAssignment(roomId) {
     <button class="btn btn-green" onclick="saveRoomAssignment('${roomId}')">Speichern</button>`;
 }
 
-function saveRoomAssignment(roomId) {
+async function saveRoomAssignment(roomId) {
   const occupant = document.getElementById('edit-occupant').value.trim();
   const shared   = document.getElementById('edit-shared').value.trim();
-  ROOM_ASSIGNMENTS[roomId] = { occupant, shared };
   try {
-    const custom = JSON.parse(localStorage.getItem('kwr-assignments') || '{}');
-    custom[roomId] = { occupant, shared };
-    localStorage.setItem('kwr-assignments', JSON.stringify(custom));
-  } catch(e) {}
-  renderAll();
-  closeRoomModal();
+    const { error } = await db.from('room_assignments')
+      .upsert({ room_id: roomId, occupant, shared }, { onConflict: 'room_id' });
+    if (error) throw error;
+    ROOM_ASSIGNMENTS[roomId] = { occupant, shared };
+    renderAll();
+    closeRoomModal();
+    showToast('Gespeichert ✓');
+  } catch(e) {
+    showToast('Fehler beim Speichern: ' + e.message);
+  }
 }
 
 async function removeAbsence(roomId, viewDateStr) {
@@ -1094,11 +1113,7 @@ function goToday() {
 updateDateDisplay();
 
 (async function init() {
-  // Lokale Anpassungen aus localStorage übernehmen
-  try {
-    const custom = localStorage.getItem('kwr-assignments');
-    if (custom) Object.assign(ROOM_ASSIGNMENTS, JSON.parse(custom));
-  } catch(e) {}
+  await loadCustomAssignments();
   state = await loadState();
   renderAll();
 })();
